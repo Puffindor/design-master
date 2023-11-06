@@ -1,5 +1,21 @@
 import { createStore } from "vuex";
 
+function convertCityName(value) {
+ return Object.keys(cityId).find((key) => cityId[key] === value);
+}
+
+const cityId = {
+ Новосибирск: 1,
+ Красноярск: 2,
+ Бердск: 3,
+ Москва: 4,
+ "Санкт-Петербург": 5,
+ Екатеринбург: 6,
+ Казань: 7,
+ Калининград: 8,
+ Мурманск: 9,
+ Пермь: 10,
+};
 export default createStore({
  state: {
   currnetEditing: null,
@@ -37,18 +53,30 @@ export default createStore({
   },
   setList(state, payload) {
    payload.forEach((el) => {
-    state.list.push(JSON.parse(el));
+    try {
+     let item = JSON.parse(el);
+     item.city = convertCityName(item.city);
+     state.list.push(item);
+    } catch (e) {
+     return;
+    }
    });
   },
   createNewItem(state, payload) {
    state.list.push(payload);
-   localStorage.setItem(payload.id, JSON.stringify(payload));
+
+   const payload2 = structuredClone(payload);
+   payload2.city = cityId[payload2.city];
+
+   localStorage.setItem(payload2.id, JSON.stringify(payload2));
   },
   setEditItem(state, payload) {
    state.currnetEditing = payload;
   },
   saveChanges(state, payload) {
-   localStorage.setItem(payload.id, JSON.stringify(payload));
+   const payload2 = structuredClone(payload);
+   payload2.city = cityId[payload2.city];
+   localStorage.setItem(payload2.id, JSON.stringify(payload2));
    state.list.forEach((el) => {
     if (el.id === payload.id) {
      const index = state.list.indexOf(el);
